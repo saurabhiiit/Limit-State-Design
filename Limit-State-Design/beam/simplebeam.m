@@ -28,6 +28,8 @@ dia=input('Please input the valid Diameter of steel bar(in mm): ');
 end
 
 factoredBM = input('Enter factored bending moment of the beam(in KN-m): ');
+Vu = input('Enter the shear force acting on the beam(in KN): ');
+
 d= D-25-dia/2;
 
 %...........................Now design FOR FLEXURE...........................
@@ -50,3 +52,26 @@ rodnum = ceil(Ast/(0.789*dia*dia));
 disp(['Percentage of longitudinal steel required: ' num2str(ptmin)]);
 disp(['Area of longitudinal steel required: ' num2str(Ast)]);
 disp(['Number of longitudinal steel required: ' num2str(rodnum)]);
+
+%......................Design For Shear...................................
+
+Tv = Vu/(b*d);
+T = [15 2.5;20 2.8;25 3.1;30 3.5];
+Tcmax = T(find(T==fck)+4);
+if Tv>Tcmax
+    disp('Not stable for shear. Change D and again redign');
+else
+   Ast1=rodnum*0.785*dia*dia;
+   pt1=(Ast1*100)/(b*d);
+   Tc=CalculateTauc(pt1,fck);
+   Asv =  157;
+   if Tv <= Tc
+       Sv = min([ceil((157*0.87*fy)/(0.4*b))-1,d,48*10]);
+   else
+       Vue=Vu-(Tc*b*d);
+       Sv= (0.87*fy*Asv*d)/Vue;
+   end
+   disp(['Spacing of the two leged 10mm diameter stirup(in mm): ' num2str(Sv)]);
+   
+end
+
